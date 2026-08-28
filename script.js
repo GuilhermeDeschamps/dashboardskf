@@ -157,10 +157,50 @@ function exportarExcel() {
         return;
     }
 
-    const ws =
-        XLSX.utils.json_to_sheet(
-            notasFiltradasAtual
-        );
+   const dadosExportacao = notasFiltradasAtual.map(item => ({
+
+    "ASV Ref Id": item["ASV Ref Id"],
+
+    Fornecedor: item.fornecedor,
+
+    Requisitante: item.requisitante,
+
+    Mês: item.mes,
+
+    Valor: item.valor,
+
+    Status: item.status,
+
+    "Data Recebimento": item["Scan/Email Date"]
+
+}));
+
+
+const ws =
+    XLSX.utils.json_to_sheet(
+        dadosExportacao
+    );
+
+ws["!cols"] = [
+
+    { wch: 30 }, // ASV Ref Id
+    { wch: 40 }, // Fornecedor
+    { wch: 30 }, // Requisitante
+    { wch: 15 }, // Mês
+    { wch: 20 }, // Valor
+    { wch: 25 }, // Status
+    { wch: 20 }  // Data
+
+];
+
+ws["!autofilter"] = {
+    ref: ws["!ref"]
+};
+
+ws["!freeze"] = {
+    xSplit: 0,
+    ySplit: 1
+};
 
     const wb =
         XLSX.utils.book_new();
@@ -172,13 +212,13 @@ function exportarExcel() {
     );
 
     XLSX.writeFile(
-        wb,
-        `Notas_Filtradas_${
-            new Date()
-                .toISOString()
-                .slice(0,10)
-        }.xlsx`
-    );
+    wb,
+    `Dashboard_Notas_Fiscais_${
+        new Date()
+            .toLocaleDateString("pt-BR")
+            .replace(/\//g, "-")
+    }.xlsx`
+);
 
 }
 
@@ -900,8 +940,15 @@ Object.entries(resumoMeses).forEach(([mes, valor]) => {
 
 });
 
-document.getElementById("melhor-mes").textContent =
-    `Melhor mês: ${melhorMes}`;
+const cardMelhorMes =
+    document.getElementById("melhor-mes");
+
+if (cardMelhorMes) {
+
+    cardMelhorMes.textContent =
+        `Melhor mês: ${melhorMes}`;
+
+}
 
 const mapaMeses = {
     Janeiro: "jan",
@@ -911,7 +958,11 @@ const mapaMeses = {
     Maio: "mai",
     Junho: "jun",
     Julho: "jul",
-    Agosto: "ago"
+    Agosto: "ago",
+    Setembro: "set",
+    Outubro: "out",
+    Novembro: "nov",
+    Dezembro: "dez"
 };
 
 Object.entries(mapaMeses).forEach(([mes, id]) => {
