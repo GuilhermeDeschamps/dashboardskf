@@ -12,6 +12,19 @@ let dados = {
 
 let notasFiltradasAtual = [];
 
+const uploadExcel =
+    document.getElementById(
+        "upload-excel"
+    );
+
+const btnUpload =
+    document.getElementById(
+        "btn-upload"
+    );
+
+console.log("BTN:", btnUpload);
+console.log("INPUT:", uploadExcel);
+
 async function carregarExcel() {
 
     console.log("1 - Entrou na função");
@@ -784,8 +797,216 @@ if (chkTodos) {
 
 } 
 
+function atualizarGraficoMensal(resumoMeses) {
 
+    const meses = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto"
+    ];
 
+const tooltip =
+    document.getElementById(
+        "tooltip-grafico"
+    );
+
+    const valores = meses.map(
+        mes => resumoMeses[mes] || 0
+    );
+
+    const maiorValor =
+        Math.max(...valores, 1);
+
+    const pontos = [];
+
+    const ids = [
+    "jan",
+    "fev",
+    "mar",
+    "abr",
+    "mai",
+    "jun",
+    "jul",
+    "ago"
+];
+
+valores.forEach((valor, index) => {
+
+    const posicoesX = [
+    20,
+    110,
+    200,
+    290,
+    380,
+    470,
+    560,
+    630
+];
+
+const x = posicoesX[index];
+
+    const y =
+        200 -
+        ((valor / maiorValor) * 160);
+
+    const ponto =
+        document.getElementById(
+            `ponto-${ids[index]}`
+        );
+
+    if (ponto) {
+
+    ponto.setAttribute(
+        "cx",
+        x
+    );
+
+    ponto.setAttribute(
+        "cy",
+        y
+    );
+
+    if (tooltip) {
+
+        ponto.onmousemove = (e) => {
+
+            tooltip.style.display =
+                "block";
+
+            tooltip.style.left =
+                (e.clientX + 15) + "px";
+
+            tooltip.style.top =
+                (e.clientY - 15) + "px";
+
+            tooltip.innerHTML = `
+                <strong>${meses[index]}</strong>
+                <br>
+                ${formatarValor(valor)}
+            `;
+
+        };
+
+        ponto.onmouseleave = () => {
+
+            tooltip.style.display =
+                "none";
+
+        };
+
+    }
+
+}
+
+const texto =
+    document.getElementById(
+        `valor-${ids[index]}`
+    );
+
+if (texto) {
+
+    texto.setAttribute(
+        "y",
+        y - 25
+    );
+
+    texto.setAttribute(
+        "x",
+        x
+    );
+
+}
+
+    pontos.push(
+        `${x},${y}`
+    );
+
+});
+
+    const linha =
+        "M" +
+        pontos.join(" L");
+
+    const area =
+        linha +
+        " L630,220 L20,220 Z";
+
+const linhaGrafico =
+    document.getElementById(
+        "grafico-linha"
+    );
+
+const areaGrafico =
+    document.getElementById(
+        "grafico-area"
+    );
+
+if (linhaGrafico) {
+    linhaGrafico.setAttribute(
+        "d",
+        linha
+    );
+}
+
+if (areaGrafico) {
+    areaGrafico.setAttribute(
+        "d",
+        area
+    );
+}
+
+}
+
+function mostrarDetalhesFornecedor(nomeFornecedor) {
+
+    const box =
+        document.getElementById(
+            "box-detalhes"
+        );
+
+    const tabela =
+        document.getElementById(
+            "detalhes-notas"
+        );
+
+    const titulo =
+        document.getElementById(
+            "titulo-detalhes"
+        );
+
+    const registros =
+        dados.notas.filter(
+            item =>
+                item.fornecedor === nomeFornecedor
+        );
+
+    titulo.textContent =
+        `Notas do fornecedor: ${nomeFornecedor}`;
+
+    tabela.innerHTML = "";
+
+    registros.forEach(item => {
+
+        tabela.innerHTML += `
+            <tr>
+                <td>${item["ASV Ref Id"] || "-"}</td>
+                <td>${item.fornecedor}</td>
+                <td>${item.requisitante}</td>
+                <td>${formatarValor(item.valor)}</td>
+                <td>${item.status}</td>
+            </tr>
+        `;
+
+    });
+
+    box.style.display = "block";
+
+}
 
 function atualizarDashboard() {
 
@@ -976,12 +1197,41 @@ Object.entries(mapaMeses).forEach(([mes, id]) => {
     if (elemento) {
 
         elemento.textContent =
-            formatarValor(valor);
+            formatarValor(valor)
+                .replace("R$ ", "");
 
     }
 
 });
 
+atualizarGraficoMensal(
+    resumoMeses
+);
+
+document
+.querySelectorAll(".mes-grafico")
+.forEach(mes => {
+
+    mes.classList.remove("ativo");
+
+});
+
+mesesSelecionados.forEach(nomeMes => {
+
+    const elemento =
+        document.querySelector(
+            `.mes-grafico[data-mes="${nomeMes}"]`
+        );
+
+    if (elemento) {
+
+        elemento.classList.add(
+            "ativo"
+        );
+
+    }
+
+});
 
     document.getElementById("valor-total").textContent =
     formatarValor(valorTotal);
@@ -1052,18 +1302,86 @@ Object.entries(resumoFornecedores)
             .toFixed(0);
 
         htmlFornecedores += `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${nome}</td>
-                <td>${formatarValor(valor)}</td>
-                <td>${percentual}%</td>
-            </tr>
-        `;
+    <tr class="linha-fornecedor"
+        data-fornecedor="${nome}">
+
+        <td>${index + 1}</td>
+        <td>${nome}</td>
+        <td>${formatarValor(valor)}</td>
+        <td>${percentual}%</td>
+
+    </tr>
+`;
 
     });
 
 tabelaFornecedores.innerHTML =
     htmlFornecedores;
+
+document
+.querySelectorAll(".linha-fornecedor")
+.forEach(linha => {
+
+    linha.addEventListener(
+        "click",
+        () => {
+
+            const fornecedor =
+                linha.dataset.fornecedor;
+
+            const checkbox =
+                [...document.querySelectorAll(
+                    ".chk-fornecedor"
+                )]
+                .find(
+                    chk =>
+                    chk.value === fornecedor
+                );
+
+            if (!checkbox) return;
+
+            const jaSelecionado =
+                checkbox.checked &&
+                document.querySelectorAll(
+                    ".chk-fornecedor:checked"
+                ).length === 1;
+
+            document
+            .querySelectorAll(
+                ".chk-fornecedor"
+            )
+            .forEach(chk => {
+
+                chk.checked = false;
+
+            });
+
+            if (!jaSelecionado) {
+
+                checkbox.checked = true;
+
+            }
+
+            atualizarDashboard();
+
+            if (!jaSelecionado) {
+
+                mostrarDetalhesFornecedor(
+                    fornecedor
+                );
+
+            } else {
+
+                document.getElementById(
+                    "box-detalhes"
+                ).style.display = "none";
+
+            }
+
+        }
+    );
+
+});
 
 listaRequisitantes.innerHTML = "";
 
@@ -1419,6 +1737,185 @@ if (btnExportar) {
     );
 
 }
+
+if (btnUpload && uploadExcel) {
+
+    btnUpload.addEventListener(
+        "click",
+        () => {
+
+            console.log("Abrindo seletor");
+
+            uploadExcel.click();
+
+        }
+    );
+
+    uploadExcel.addEventListener(
+        "change",
+        async (e) => {
+
+            const arquivo =
+                e.target.files[0];
+
+           document.getElementById(
+    "arquivo-carregado"
+).textContent =
+    `Base carregada: ${arquivo.name}`;
+
+
+            if (!arquivo) return;
+
+            const buffer =
+                await arquivo.arrayBuffer();
+
+            const workbook =
+                XLSX.read(
+                    buffer,
+                    { type: "array" }
+                );
+
+            const sheet =
+                workbook.Sheets[
+                    workbook.SheetNames[0]
+                ];
+
+            const linhas =
+                XLSX.utils.sheet_to_json(
+                    sheet
+                );
+
+            dados.notas = [];
+
+            const nomesMeses = [
+                "Janeiro",
+                "Fevereiro",
+                "Março",
+                "Abril",
+                "Maio",
+                "Junho",
+                "Julho",
+                "Agosto",
+                "Setembro",
+                "Outubro",
+                "Novembro",
+                "Dezembro"
+            ];
+
+            dados.notas = linhas.map(item => {
+
+                let data;
+
+                if (
+                    typeof item["Scan/Email Date"] === "number"
+                ) {
+
+                    data = new Date(
+                        (item["Scan/Email Date"] - 25569)
+                        * 86400
+                        * 1000
+                    );
+
+                } else {
+
+                    data = new Date(
+                        item["Scan/Email Date"]
+                    );
+
+                }
+
+                return {
+
+                    ...item,
+
+                    mes:
+                        nomesMeses[
+                            data.getMonth()
+                        ] || "Sem mês",
+
+                    fornecedor:
+                        item["Fornecedor"] ||
+                        "Não informado",
+
+                    requisitante:
+                        item["Task Owner"] ||
+                        "Não informado",
+
+                    valor:
+                        Number(
+                            item["Net Amount"]
+                        ) || 0,
+
+                    status:
+                        (
+                            item["Status NF"] ||
+                            "Sem pendência"
+                        )
+                        .toString()
+                        .trim()
+
+                };
+
+            });
+
+            preencherFiltros();
+
+            atualizarDashboard();
+
+        }
+    );
+}
+
+document
+.querySelectorAll(".mes-grafico")
+.forEach(mes => {
+
+    mes.addEventListener(
+        "click",
+        () => {
+
+            const nomeMes =
+                mes.dataset.mes;
+
+            const checkbox =
+                [...document.querySelectorAll(
+                    ".chk-mes"
+                )]
+                .find(
+                    chk =>
+                    chk.value === nomeMes
+                );
+
+            if (!checkbox) return;
+
+            const jaSelecionado =
+                checkbox.checked &&
+                document.querySelectorAll(
+                    ".chk-mes:checked"
+                ).length === 1;
+
+            document
+            .querySelectorAll(
+                ".chk-mes"
+            )
+            .forEach(chk => {
+
+                chk.checked = false;
+
+            });
+
+            if (!jaSelecionado) {
+
+                checkbox.checked = true;
+
+            }
+
+            atualizarDashboard();
+
+        }
+    );
+
+});
 
 (async () => {
 

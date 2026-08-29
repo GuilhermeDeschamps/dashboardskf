@@ -164,11 +164,23 @@ body{
     gap:20px;
 }
 
+#arquivo-carregado{
+
+    margin-bottom:15px;
+
+    color:#67d9ff;
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
 .card{
     position:relative;
     border-radius:24px;
     padding:20px;
-    min-height:260px;
+    min-height:220px;
     overflow:hidden;
 
     border:1px solid rgba(255,255,255,.15);
@@ -262,9 +274,15 @@ body{
 }
 
 .box-exportar{
-    width:260px;
-    min-width:260px;
-    max-width:260px;
+    width:220px;
+    min-width:220px;
+    max-width:220px;
+}
+
+.box-upload{
+    width:180px;
+    min-width:180px;
+    max-width:180px;
 }
 
 .box h3{
@@ -307,9 +325,9 @@ td:first-child{
 }
 
 .box-mes{
-    width:260px;
-    min-width:260px;
-    max-width:260px;
+    width:180px;
+    min-width:180px;
+    max-width:180px;
     position:relative;
 }
 
@@ -323,7 +341,7 @@ td:first-child{
 
     left:0;
 
-    width:260px;
+    width:220px;
 
     max-height:180px;
 
@@ -407,7 +425,7 @@ td:first-child{
 
 
 .grafico-mensal svg{
-    height:260px;
+    height:220px;
 }
 
 .grafico-mensal .box{
@@ -423,7 +441,7 @@ td:first-child{
 }
 
 .graficos-row .box{
-    height:350px;
+    min-height:350px;
     width:100%;
 }
 
@@ -466,9 +484,9 @@ display:none;
 }
 
 .box-fornecedor{
-    width:260px;
-    min-width:260px;
-    max-width:260px;
+    width:220px;
+    min-width:220px;
+    max-width:220px;
 }
 
 .titulo-filtro{
@@ -506,9 +524,9 @@ display:none;
 }
 
 .box-requisitante{
-    width:260px;
-    min-width:260px;
-    max-width:260px;
+    width:220px;
+    min-width:220px;
+    max-width:220px;
 }
 
 #filtro-requisitante{
@@ -545,8 +563,8 @@ display:none;
 }
 
 .box-status{
-    width:260px;
-    min-width:260px;
+    width:220px;
+    min-width:220px;
     position:relative;
     flex-shrink:0;
 }
@@ -561,7 +579,7 @@ display:none;
 
     left:0;
 
-    width:260px;
+    width:220px;
 
     max-height:180px;
 
@@ -592,6 +610,90 @@ display:none;
 
 }
 
+#tooltip-grafico{
+    position:fixed;
+    display:none;
+
+    background:#15103f;
+    color:white;
+
+    padding:10px 12px;
+
+    border-radius:10px;
+
+    border:1px solid rgba(255,255,255,.15);
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.35);
+
+    font-size:13px;
+
+    z-index:9999;
+
+    pointer-events:none;
+}
+
+#grafico-linha,
+#grafico-area{
+    transition:all .6s ease-in-out;
+}
+
+.grafico-mensal circle,
+.grafico-mensal text{
+    transition:all .4s ease-in-out;
+}
+
+.linha-fornecedor{
+    cursor:pointer;
+    transition:.2s;
+}
+
+.linha-fornecedor:hover{
+    background:rgba(255,255,255,.08);
+}
+
+.linha-fornecedor.ativo{
+    background:rgba(0,212,255,.15);
+    border-left:4px solid #00d4ff;
+}
+
+.mes-grafico{
+    cursor:pointer;
+    transition:.2s;
+}
+
+.mes-grafico:hover{
+    fill:#00d4ff;
+}
+
+.mes-grafico.ativo{
+    fill:#00d4ff;
+    font-weight:bold;
+}
+
+#box-detalhes {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+#box-detalhes thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #2a237e;
+    white-space: nowrap;
+}
+
+#detalhes-notas {
+    width: 100%;
+    table-layout: fixed;
+}
+
+#detalhes-notas td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 </style>
 </head>
 
@@ -617,6 +719,24 @@ display:none;
 
     <button id="btn-exportar" class="btn-filtro">
         ⬇️ Exportar Excel
+    </button>
+
+</div>
+
+<div class="box-upload">
+
+    <input
+        type="file"
+        id="upload-excel"
+        accept=".xlsx,.xls"
+        style="display:none;"
+    >
+
+    <button
+        id="btn-upload"
+        class="btn-filtro"
+    >
+        📂 Carregar Excel
     </button>
 
 </div>
@@ -667,9 +787,13 @@ display:none;
 
 </div>
 
-    </div>
+</div>
 
-    <div class="cards">
+<div id="arquivo-carregado">
+    Base carregada: AUTOMOTIVO.xlsx
+</div>
+
+<div class="cards">
 
     <div class="card blue">
 
@@ -770,7 +894,33 @@ display:none;
 
 </div>
 
+<div class="box" id="box-detalhes" style="display:none; margin-top:20px;">
+
+    <h3 id="titulo-detalhes">
+        Detalhamento das Notas
+    </h3>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>ASV Ref Id</th>
+                <th>Fornecedor</th>
+                <th>Requisitante</th>
+                <th>Valor</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody id="detalhes-notas">
+        </tbody>
+
+    </table>
+
+</div>
+
 <div class="graficos-row">
+
 
     <div class="box">
 
@@ -813,74 +963,115 @@ display:none;
         <svg viewBox="0 0 650 260">
 
     <path
-    d="
-    M20,180
-    L110,140
-    L200,150
-    L290,100
-    L380,120
-    L470,60
-    L560,80
-    L630,40
-    L630,220
-    L20,220
-    Z"
-    fill="rgba(0,212,255,.18)">
-    </path>
+id="grafico-area"
+d=""
+fill="rgba(0,212,255,.18)">
+</path>
 
     <path
-    d="
-    M20,180
-    L110,140
-    L200,150
-    L290,100
-    L380,120
-    L470,60
-    L560,80
-    L630,40"
-    fill="none"
-    stroke="#00d4ff"
-    stroke-width="4">
-    </path>
+id="grafico-linha"
+d=""
+fill="none"
+stroke="#00d4ff"
+stroke-width="4">
+</path>
 
-    <circle cx="20" cy="180" r="6" fill="#00d4ff"/>
+<circle id="ponto-jan" cx="20" cy="180" r="8" fill="#00d4ff"/>
 <text id="valor-jan" x="20" y="165" fill="white" font-size="12" text-anchor="middle">85K</text>
 
-<circle cx="110" cy="140" r="6" fill="#00d4ff"/>
+<circle id="ponto-fev" cx="110" cy="140" r="8" fill="#00d4ff"/>
 <text id="valor-fev" x="110" y="125" fill="white" font-size="12" text-anchor="middle">120K</text>
 
-<circle cx="200" cy="150" r="6" fill="#00d4ff"/>
+<circle id="ponto-mar" cx="200" cy="150" r="8" fill="#00d4ff"/>
 <text id="valor-mar" x="200" y="135" fill="white" font-size="12" text-anchor="middle">110K</text>
 
-<circle cx="290" cy="100" r="6" fill="#00d4ff"/>
+<circle id="ponto-abr" cx="290" cy="100" r="8" fill="#00d4ff"/>
 <text id="valor-abr" x="290" y="85" fill="white" font-size="12" text-anchor="middle">170K</text>
 
-<circle cx="380" cy="120" r="6" fill="#00d4ff"/>
+<circle id="ponto-mai" cx="380" cy="120" r="8" fill="#00d4ff"/>
 <text id="valor-mai" x="380" y="105" fill="white" font-size="12" text-anchor="middle">145K</text>
 
-<circle cx="470" cy="60" r="6" fill="#00d4ff"/>
+<circle id="ponto-jun" cx="470" cy="60" r="8" fill="#00d4ff"/>
 <text id="valor-jun" x="470" y="45" fill="white" font-size="12" text-anchor="middle">220K</text>
 
-<circle cx="560" cy="80" r="6" fill="#00d4ff"/>
+<circle id="ponto-jul" cx="560" cy="80" r="8" fill="#00d4ff"/>
 <text id="valor-jul" x="560" y="65" fill="white" font-size="12" text-anchor="middle">190K</text>
 
-<circle cx="630" cy="40" r="6" fill="#00d4ff"/>
+<circle id="ponto-ago" cx="630" cy="40" r="8" fill="#00d4ff"/>
 <text id="valor-ago" x="630" y="25" fill="white" font-size="12" text-anchor="middle">260K</text>
 
-    <text x="20" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Jan</text>
-    <text x="110" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Fev</text>
-    <text x="200" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Mar</text>
-    <text x="290" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Abr</text>
-    <text x="380" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Mai</text>
-    <text x="470" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Jun</text>
-    <text x="560" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Jul</text>
-    <text x="630" y="245" text-anchor="middle" fill="#b8c7ff" font-size="12">Ago</text>
+
+<text class="mes-grafico"
+      data-mes="Janeiro"
+      x="20"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Jan</text>
+
+<text class="mes-grafico"
+      data-mes="Fevereiro"
+      x="110"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Fev</text>
+
+<text class="mes-grafico"
+      data-mes="Março"
+      x="200"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Mar</text>
+
+<text class="mes-grafico"
+      data-mes="Abril"
+      x="290"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Abr</text>
+
+<text class="mes-grafico"
+      data-mes="Maio"
+      x="380"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Mai</text>
+
+<text class="mes-grafico"
+      data-mes="Junho"
+      x="470"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Jun</text>
+
+<text class="mes-grafico"
+      data-mes="Julho"
+      x="560"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Jul</text>
+
+<text class="mes-grafico"
+      data-mes="Agosto"
+      x="630"
+      y="245"
+      text-anchor="middle"
+      fill="#b8c7ff"
+      font-size="12">Ago</text>
+
 
 </svg>
 
 </div>
 </div>
 </div>
+<div id="tooltip-grafico"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
