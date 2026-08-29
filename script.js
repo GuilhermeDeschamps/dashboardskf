@@ -1,5 +1,52 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+const btnLogin =
+    document.getElementById("btn-login");
+
+const dashboard =
+    document.getElementById("dashboard");
+
+const loginScreen =
+    document.getElementById("login-screen");
+
+const erroLogin =
+    document.getElementById("erro-login");
+
+if (btnLogin) {
+
+    btnLogin.addEventListener(
+        "click",
+        () => {
+
+            const usuario =
+                document.getElementById("usuario").value;
+
+            const senha =
+                document.getElementById("senha").value;
+
+            if (
+                usuario === "admin" &&
+                senha === "123456"
+            ) {
+
+                loginScreen.style.display =
+                    "none";
+
+                dashboard.style.display =
+                    "block";
+
+            } else {
+
+                erroLogin.textContent =
+                    "Usuário ou senha inválidos";
+
+            }
+
+        }
+    );
+
+}
+
 let dados = {
 
     notas: [],

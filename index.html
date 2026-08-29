@@ -694,18 +694,130 @@ display:none;
     text-overflow: ellipsis;
 }
 
+#login-screen{
+
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100vh;
+
+    background:linear-gradient(
+        135deg,
+        #110a5c,
+        #1b1575,
+        #220d86
+    );
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    z-index:99999;
+}
+
+.login-box{
+
+    width:350px;
+
+    background:rgba(255,255,255,.08);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    border-radius:24px;
+
+    padding:30px;
+
+    backdrop-filter:blur(15px);
+
+    text-align:center;
+}
+
+.login-box h2{
+
+    color:#67d9ff;
+    margin-bottom:25px;
+}
+
+.login-box input{
+
+    width:100%;
+    height:45px;
+
+    margin-bottom:15px;
+
+    border:none;
+    border-radius:10px;
+
+    padding:0 12px;
+}
+
+.login-box button{
+
+    width:100%;
+    height:45px;
+
+    border:none;
+    border-radius:10px;
+
+    background:#00d4ff;
+
+    color:#08143d;
+
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#erro-login{
+
+    margin-top:10px;
+
+    color:#ff6b6b;
+
+    font-size:13px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
+<div id="login-screen">
+
+    <div class="login-box">
+
+        <h2>SKF Dashboard</h2>
+
+        <input
+            type="text"
+            id="usuario"
+            placeholder="Usuário"
+        >
+
+        <input
+            type="password"
+            id="senha"
+            placeholder="Senha"
+        >
+
+        <button id="btn-login">
+            Entrar
+        </button>
+
+        <div id="erro-login"></div>
+
+    </div>
+
+</div>
+
+<div class="sidebar" id="sidebar" style="display:none;">
     <div class="logo">
         SKF
     </div>
 </div>
 
-<div class="main">
+<div class="main" id="dashboard" style="display:none;">
 
     <div class="header">
 
