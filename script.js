@@ -77,7 +77,7 @@ async function carregarExcel() {
     console.log("1 - Entrou na função");
 
     const resposta =
-        await fetch("AUTOMOTIVO.xlsx");
+        await fetch("INDUSTRIAL.xlsx");
 
     console.log("2 - Fetch OK");
 
