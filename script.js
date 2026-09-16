@@ -6,6 +6,9 @@ const btnLogin =
 const dashboard =
     document.getElementById("dashboard");
 
+const sidebar =
+    document.getElementById("sidebar");
+
 const loginScreen =
     document.getElementById("login-screen");
 
@@ -24,28 +27,43 @@ if (btnLogin) {
             const senha =
                 document.getElementById("senha").value;
 
-            if (
-                usuario === "admin" &&
-                senha === "123456"
-            ) {
+if (
+    usuario === "admin" &&
+    senha === "123456"
+) {
 
-                loginScreen.style.display =
-                    "none";
+    loginScreen.style.display =
+        "none";
 
-                dashboard.style.display =
-                    "block";
+    dashboard.style.display =
+        "block";
 
-            } else {
+    sidebar.style.display =
+        "block";
 
-                erroLogin.textContent =
-                    "Usuário ou senha inválidos";
+} else {
 
-            }
+    erroLogin.textContent =
+        "Usuário ou senha inválidos";
+
+}
 
         }
     );
 
 }
+
+document
+    .getElementById("senha")
+    .addEventListener("keypress", e => {
+
+        if (e.key === "Enter") {
+
+            btnLogin.click();
+
+        }
+
+    });
 
 let dados = {
 
@@ -76,8 +94,9 @@ async function carregarExcel() {
 
     console.log("1 - Entrou na função");
 
+
     const resposta =
-        await fetch("INDUSTRIAL.xlsx");
+        await fetch("AUTOMOTIVO.xlsx");
 
     console.log("2 - Fetch OK");
 
