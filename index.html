@@ -56,13 +56,18 @@ td{padding:7px 6px;border-bottom:1px solid #14204226}.r{text-align:right}.tw{ove
 let D = [];
 async function carregarDados() {
     try {
-        const resp = await fetch('dados.json');
+	const resp = await fetch(
+    './dados.json?v=' + Date.now(),
+    { cache: 'no-store' }
+);
 
         if (!resp.ok) {
             throw new Error('dados.json não encontrado');
         }
 
         D = await resp.json();
+	console.log(D.length);
+	console.log('Qtd notas:', D.length);
 
         buildFilters();
         render();
