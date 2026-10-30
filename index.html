@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel de Notas Pendentes – Automotivo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#070d1f;--card:#0d1630;--bd:#1b2a52;--tx:#e8edff;--mu:#8393c0;--c1:#2dd4ee;--c2:#8b5cf6;--c3:#f59e0b;--c4:#22c55e;--c5:#ef4444;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 500px at 20% -10%,#12214a,var(--bg));color:var(--tx);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px}
+.wrap{max-width:1280px;margin:auto}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 18px;margin-bottom:14px}
+h1{font-size:18px;margin:0}h1 small{display:block;color:var(--mu);font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.kp{display:flex;gap:22px;flex-wrap:wrap}.kp div small{display:block;color:var(--mu);font-size:10px;letter-spacing:.1em;text-transform:uppercase}.kp b{font-size:20px}
+.fb{display:flex;flex-wrap:wrap;gap:8px;align-items:center}input[type=search]{flex:1 1 260px;background:#0a1228;color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:13px}.fb select{flex:1 1 150px;min-width:0}
+button,.b2{background:#0a1228;color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer}.b1{background:linear-gradient(90deg,#2dd4ee,#8b5cf6);color:#04101f;border:0;font-weight:600}.mu{color:var(--mu);font-size:12px}.ck{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 10px}.ck label{font-size:12px;display:flex;gap:5px;align-items:center}
+select{background:#0a1228;color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:13px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(12,1fr)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;min-width:0}
+.card h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 2px}.card p{margin:0 0 10px;color:var(--mu);font-size:11px}
+.s12{grid-column:span 12}.s8{grid-column:span 8}.s7{grid-column:span 7}.s6{grid-column:span 6}.s5{grid-column:span 5}.s4{grid-column:span 4}.s3{grid-column:span 3}
+.kpi b{display:block;font-size:26px;margin-top:6px}.kpi span{font-size:11px;color:var(--mu)}
+.ch{position:relative;height:260px}
+table{width:100%;border-collapse:collapse;font-size:12px}th{color:var(--mu);text-align:left;font-weight:500;padding:6px;border-bottom:1px solid var(--bd);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+tbody tr{cursor:pointer}tbody tr:hover{background:#13214a}
+.md{position:fixed;inset:0;background:#030712cc;display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.md.on{display:flex}.mb{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;max-width:560px;width:100%;max-height:90%;overflow:auto}.mb h3{margin:0 0 4px;font-size:15px}.id{font:600 14px ui-monospace,Menlo,monospace;color:var(--c1);word-break:break-all;background:#0a1228;border:1px solid var(--bd);border-radius:8px;padding:10px;margin:8px 0}.dl{display:grid;grid-template-columns:130px 1fr;gap:6px 10px;font-size:12px;margin:12px 0}.dl dt{color:var(--mu)}.dl dd{margin:0;word-break:break-word}
+td{padding:7px 6px;border-bottom:1px solid #14204226}.r{text-align:right}.tw{overflow-x:auto}
+.pill{padding:2px 8px;border-radius:99px;font-size:11px;border:1px solid}
+@media(max-width:900px){.s8,.s7,.s6,.s5,.s4{grid-column:span 12}.s3{grid-column:span 6}}
+</style></head><body><div class="wrap">
+<header><h1>Painel de Notas Pendentes<small>Automotivo · Entidade 9645L · Fila "Confirmar novo pedido"</small></h1>
+<div class="kp"><div><small>Notas pendentes</small><b id="h1"></b></div><div><small>Valor pendente (bruto)</small><b id="h2"></b></div></div>
+</header>
+<section class="card" style="margin-bottom:14px"><h2>Filtros e dados</h2><p>Gráficos, KPIs, tabela e exportação seguem os filtros ativos</p>
+<div class="fb"><input id="q" type="search" placeholder="Pesquisar NF, fornecedor, PO ou requisitante…"><select id="fo"></select><select id="fs"></select><select id="fm"></select><select id="fa"></select><select id="fn"></select><button id="clr">Limpar filtros</button></div>
+<div class="fb" style="margin-top:10px"><label class="b2" for="up">⟳ Atualizar dados (carregar planilha)</label><input type="file" id="up" accept=".xlsx,.xls,.csv" hidden><span id="upm" class="mu">Carregue um .xlsx com as mesmas colunas para atualizar o painel.</span><span style="flex:1"></span><span id="exn" class="mu"></span><button id="save" class="b2">💾 Salvar Dados</button>
+<button class="b1" id="exx">⇩ Exportar Excel</button>
+<button id="exc">⇩ CSV</button>
+<span id="exm" class="mu"></span>
+</div></section>
+
+<div class="grid">
+<div class="card kpi s3"><h2>Total de notas pendentes</h2><b id="k1" style="color:var(--c1)"></b><span id="k1s"></span></div>
+<div class="card kpi s3"><h2>Valor total pendente</h2><b id="k2" style="color:var(--c2)"></b><span id="k2s"></span></div>
+<div class="card kpi s3"><h2>Ticket médio</h2><b id="k3" style="color:var(--c3)"></b><span id="k3s"></span></div>
+<div class="card kpi s3"><h2>Pendentes há mais de 60 dias</h2><b id="k4" style="color:var(--c5)"></b><span id="k4s"></span></div>
+<div class="card s8"><h2>Evolução mensal de pendências</h2><p>Valor bruto (barras) e quantidade de notas (linha) por mês de recebimento</p><div class="ch"><canvas id="c1"></canvas></div></div>
+<div class="card s4"><h2>Motivo da pendência</h2><p>Distribuição por Status NF (quantidade de notas)</p><div class="ch"><canvas id="c2"></canvas></div></div>
+<div class="card s6"><h2>Quantidade de notas por requisitante</h2><p>Quem concentra o maior número de pendências</p><div class="ch" style="height:380px"><canvas id="c3"></canvas></div></div>
+<div class="card s6"><h2>Valor pendente por requisitante</h2><p>Valor bruto em R$</p><div class="ch" style="height:380px"><canvas id="c4"></canvas></div></div>
+<div class="card s5"><h2>Aging das pendências</h2><p>Dias desde o recebimento do documento</p><div class="ch"><canvas id="c5"></canvas></div></div>
+<div class="card s7"><h2>Top 10 fornecedores</h2><p>Maior valor pendente</p><div class="ch"><canvas id="c6"></canvas></div></div>
+<div class="card s12"><h2>Notas mais antigas em aberto</h2><p>Prioridade de cobrança · clique em uma nota para ver o ASV Ref ID e os detalhes</p><div class="tw"><table><thead><tr><th>NF</th><th>ASV Ref ID</th><th>Fornecedor</th><th>Requisitante</th><th>PO</th><th>Recebida em</th><th class="r">Dias</th><th class="r">Valor bruto</th><th>Status</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+</div></div>
+<div class="md" id="md"><div class="mb" id="mb"></div></div>
+<script>
+let D = [];
+async function carregarDados() {
+    try {
+const resp = await fetch(
+    './notas.xlsx?v=' + Date.now(),
+    { cache: 'no-store' }
+);
+
+const wb = XLSX.read(
+    await resp.arrayBuffer(),
+    { cellDates: true }
+);
+
+const js = XLSX.utils.sheet_to_json(
+    wb.Sheets[wb.SheetNames[0]]
+);
+
+D = js.filter(
+    x => x['Gross Amount'] != null &&
+         x['Scan/Email Date']
+).map(x => ({
+    a: String(x['ASV Ref Id'] || '—'),
+    sr: String(x['Source Ref Id'] || '—'),
+    o: x['Task Owner'] || '—',
+    f: x['Fornecedor'] || '—',
+    n: String(x['Invoice Number'] ?? ''),
+    po: x['PO Number'] || '',
+    s: iso(x['Scan/Email Date']),
+    i: iso(x['Invoice Date']),
+    g: nm(x['Gross Amount']),
+    v: nm(x['Net Amount']),
+    m: x['Status NF'] || '—',
+    ms: x['Minor Status'] || '—'
+}));
+
+console.log('Qtd notas:', D.length);
+
+        buildFilters();
+        render();
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        D = [];
+
+        buildFilters();
+        render();
+    }
+}
+
+const TODAY=new Date(),$=id=>document.getElementById(id);
+const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}),num=v=>v.toLocaleString('pt-BR');
+const days=r=>Math.round((TODAY-new Date(r.s))/864e5),mon=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+Chart.defaults.color='#8393c0';Chart.defaults.font.size=11;Chart.defaults.borderColor='#1b2a5255';
+const CH={};function mk(id,cfg){if(CH[id])CH[id].destroy();CH[id]=new Chart($(id),cfg)}
+const grp=(a,k)=>{const m={};a.forEach(r=>{const x=m[r[k]]??={q:0,v:0};x.q++;x.v+=r.g});return Object.entries(m)};
+let TOP=[];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function openNF(r){const dl=[['Nº da NF',r.n],['Source Ref ID',r.sr],['PO',r.po],['Fornecedor',r.f],['Requisitante',r.o],['Recebida em',dmy(r.s)],['Data da NF',dmy(r.i)],['Dias pendente',days(r)],['Valor bruto',brl(r.g)],['Valor líquido',brl(r.v)],['Status NF',r.m],['Minor Status',r.ms]];
+$('mb').innerHTML=`<h3>Detalhes da nota ${esc(r.n)}</h3><div class="mu">ASV Ref ID</div><div class="id" id="asv">${esc(r.a)}</div><div class="fb"><button class="b1" id="cp">Copiar ASV Ref ID</button><button id="cl">Fechar</button><span class="mu" id="cpm"></span></div><dl class="dl">${dl.map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('')}</dl>`;
+$('md').classList.add('on');$('cl').onclick=()=>$('md').classList.remove('on');
+$('cp').onclick=async()=>{let ok=false;try{await navigator.clipboard.writeText(r.a);ok=true}catch(_){const t=document.createElement('textarea');t.value=r.a;document.body.appendChild(t);t.select();try{ok=document.execCommand('copy')}catch(_){}t.remove()}$('cpm').textContent=ok?'Copiado!':'Selecione o texto e copie manualmente.'}}
+$('md').onclick=e=>{if(e.target.id==='md')$('md').classList.remove('on')};document.addEventListener('keydown',e=>{if(e.key==='Escape')$('md').classList.remove('on')});
+$('tb').onclick=e=>{const tr=e.target.closest('tr');if(tr&&TOP[tr.dataset.i])openNF(TOP[tr.dataset.i])};
+const BK=['0–30 dias','31–60 dias','61–90 dias','>90 dias'],bucket=r=>{const d=days(r);return d<=30?BK[0]:d<=60?BK[1]:d<=90?BK[2]:BK[3]};
+const COLS=[['a','ASV Ref ID'],['n','Nº NF'],['f','Fornecedor'],['o','Requisitante'],['po','PO'],['s','Recebida em'],['i','Data da NF'],['g','Valor bruto'],['v','Valor líquido'],['dias','Dias pendente'],['m','Status NF'],['ms','Minor Status']];
+const dmy=s=>s.split('-').reverse().join('/'),val=(r,k)=>k==='dias'?days(r):(k==='s'||k==='i')?dmy(r[k]):r[k];
+const IDS=['q','fo','fs','fm','fa','fn'];
+function opts(id,ph,list){const e=$(id),cur=e.value;e.innerHTML=`<option value="">${ph}</option>`+list.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');e.value=list.some(x=>x[0]===cur)?cur:''}
+const U=k=>[...new Set(D.map(r=>r[k]))].sort().map(x=>[x,x]);
+function buildFilters(){opts('fo','Requisitante: todos',U('o'));opts('fs','Fornecedor: todos',U('f'));
+opts('fm','Mês: todos',[...new Set(D.map(r=>r.s.slice(0,7)))].sort().map(k=>[k,mon[+k.slice(5)-1]+'/'+k.slice(0,4)]));
+opts('fa','Aging: todos',BK.map(x=>[x,x]));opts('fn','Status NF: todos',U('m'))}
+function filt(){const q=$('q').value.toLowerCase().trim();return D.filter(r=>(!q||[r.n,r.f,r.po,r.o].join(' ').toLowerCase().includes(q))&&(!$('fo').value||r.o===$('fo').value)&&(!$('fs').value||r.f===$('fs').value)&&(!$('fm').value||r.s.slice(0,7)===$('fm').value)&&(!$('fa').value||bucket(r)===$('fa').value)&&(!$('fn').value||r.m===$('fn').value))}
+IDS.forEach(id=>$(id).addEventListener(id==='q'?'input':'change',render));
+$('clr').onclick=()=>{IDS.forEach(id=>$(id).value='');render()};
+async function doExport(fmt){const rows=filt(),m=$('exm');
+if(!rows.length){m.textContent='Nenhuma nota no filtro atual.';return}
+let dl=null;try{dl=window.claude?await claude.use('downloads'):null}catch(_){}
+const ws=XLSX.utils.json_to_sheet(rows.map(r=>Object.fromEntries(COLS.map(c=>[c[1],val(r,c[0])]))));
+const mk=()=>fmt==='xlsx'?new Blob([XLSX.write((()=>{const w=XLSX.utils.book_new();XLSX.utils.book_append_sheet(w,ws,'Notas pendentes');return w})(),{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}):new Blob(['\ufeff'+XLSX.utils.sheet_to_csv(ws,{FS:';'})],{type:'text/csv;charset=utf-8'});
+if(!dl){try{const u=URL.createObjectURL(mk()),a=document.createElement('a');a.href=u;a.download='notas_pendentes.'+fmt;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);m.textContent=rows.length+' notas exportadas ('+fmt.toUpperCase()+'). Verifique a pasta Downloads.'}catch(_){m.textContent='Não foi possível gerar o arquivo neste ambiente.'}return}
+try{
+if(fmt==='xlsx'){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Notas pendentes');
+await dl.save({filename:'notas_pendentes.xlsx',data:new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})])})}
+else await dl.save({filename:'notas_pendentes.csv',data:'\ufeff'+XLSX.utils.sheet_to_csv(ws,{FS:';'})});
+m.textContent=rows.length+' notas exportadas.'}catch(e){m.textContent=e&&e.code==='declined'?'Exportação cancelada.':'Não foi possível exportar.'}}
+$('exx').onclick=()=>doExport('xlsx');$('exc').onclick=()=>doExport('csv');
+$('save').onclick = () => {
+
+    const blob = new Blob(
+        [JSON.stringify(D, null, 2)],
+        { type: 'application/json' }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = 'dados.json';
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+    alert('dados.json baixado com sucesso!');
+};
+const iso=v=>v instanceof Date?new Date(v.getTime()+432e5).toISOString().slice(0,10):String(v||'').slice(0,10),nm=v=>typeof v==='number'?v:parseFloat(String(v||0).replace(/\./g,'').replace(',','.'))||0;
+$('up').onchange=async e=>{const f=e.target.files[0];if(!f)return;const m=$('upm');
+try{const wb=XLSX.read(await f.arrayBuffer(),{cellDates:true}),js=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+const nd=js.filter(x=>x['Gross Amount']!=null&&x['Scan/Email Date']).map(x=>({a:String(x['ASV Ref Id']||'—'),sr:String(x['Source Ref Id']||'—'),o:x['Task Owner']||'—',f:x['Fornecedor']||'—',n:String(x['Invoice Number']??''),po:x['PO Number']||'',s:iso(x['Scan/Email Date']),i:iso(x['Invoice Date']),g:nm(x['Gross Amount']),v:nm(x['Net Amount']),m:x['Status NF']||'—',ms:x['Minor Status']||'—'}));
+if(!nd.length)throw 0;
+
+D = nd;
+
+IDS.forEach(id=>$(id).value='');
+
+buildFilters();
+render();
+
+m.textContent='Dados atualizados: '+nd.length+' notas ('+f.name+').';
+}
+catch(_) {
+    m.textContent = 'Não consegui ler a planilha. Use o mesmo formato (colunas Task Owner, Fornecedor, Gross Amount, Scan/Email Date, Status NF…).';
+}
+
+e.target.value = '';
+};
+const bar=(lab,data,col,fmt)=>({type:'bar',data:{labels:lab,datasets:[{data,backgroundColor:col,borderRadius:5}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{x:{ticks:{callback:fmt}}}}});
+function render(){
+const a=filt(),n=a.length;$('exn').textContent=n+' de '+D.length+' notas no filtro atual';const tot=a.reduce((s,r)=>s+r.g,0),old=a.filter(r=>days(r)>60).length;
+$('h1').textContent=n;$('h2').textContent=brl(tot);
+$('k1').textContent=n;$('k1s').textContent=new Set(a.map(r=>r.f)).size+' fornecedores · '+new Set(a.map(r=>r.o)).size+' requisitantes';
+$('k2').textContent=brl(tot);$('k2s').textContent='Líquido: '+brl(a.reduce((s,r)=>s+r.v,0));
+$('k3').textContent=brl(n?tot/n:0);$('k3s').textContent='Maior nota: '+brl(Math.max(0,...a.map(r=>r.g)));
+$('k4').textContent=old;$('k4s').textContent=n?Math.round(old/n*100)+'% das notas · '+brl(a.filter(r=>days(r)>60).reduce((s,r)=>s+r.g,0)):'';
+const m={};a.forEach(r=>{const k=r.s.slice(0,7);const x=m[k]??={q:0,v:0};x.q++;x.v+=r.g});const ks=Object.keys(m).sort();
+mk('c1',{data:{labels:ks.map(k=>mon[+k.slice(5)-1]+'/'+k.slice(2,4)),datasets:[{type:'bar',label:'Valor (R$)',data:ks.map(k=>m[k].v),backgroundColor:'#2dd4ee99',borderRadius:5,yAxisID:'y'},{type:'line',label:'Qtde notas',data:ks.map(k=>m[k].q),borderColor:'#f59e0b',backgroundColor:'#f59e0b',tension:.35,yAxisID:'y1'}]},options:{maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>brl(v)}},y1:{position:'right',grid:{display:false},ticks:{precision:0}}},plugins:{legend:{labels:{boxWidth:10}}}}});
+const mo=grp(a,'m');mk('c2',{type:'doughnut',data:{labels:mo.map(x=>x[0]),datasets:[{data:mo.map(x=>x[1].q),backgroundColor:['#8b5cf6','#2dd4ee','#f59e0b','#22c55e','#ef4444','#fb923c'],borderColor:'#0d1630',borderWidth:3}]},options:{maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:10}},tooltip:{callbacks:{label:c=>c.raw+' notas · '+brl(mo[c.dataIndex][1].v)}}}}});
+const ow=grp(a,'o');const byQ=[...ow].sort((x,y)=>y[1].q-x[1].q),byV=[...ow].sort((x,y)=>y[1].v-x[1].v);
+mk('c3',bar(byQ.map(x=>x[0]),byQ.map(x=>x[1].q),'#8b5cf6',v=>num(v)));mk('c4',bar(byV.map(x=>x[0]),byV.map(x=>x[1].v),'#2dd4ee',v=>brl(v)));
+const bk=[['0–30',0,30],['31–60',31,60],['61–90',61,90],['>90',91,1e9]].map(b=>[b[0],a.filter(r=>days(r)>=b[1]&&days(r)<=b[2])]);
+mk('c5',{type:'bar',data:{labels:bk.map(b=>b[0]+' dias'),datasets:[{data:bk.map(b=>b[1].length),backgroundColor:['#22c55e','#f59e0b','#fb923c','#ef4444'],borderRadius:5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+' notas · '+brl(bk[c.dataIndex][1].reduce((s,r)=>s+r.g,0))}}},scales:{y:{ticks:{precision:0}}}}});
+const fo=[...grp(a,'f')].sort((x,y)=>y[1].v-x[1].v).slice(0,10);mk('c6',bar(fo.map(x=>x[0]),fo.map(x=>x[1].v),'#22c55e',v=>brl(v)));
+TOP=[...a].sort((x,y)=>days(y)-days(x)).slice(0,10);$('tb').innerHTML=TOP.map((r,i)=>{const d=days(r),c=d>90?'#ef4444':d>60?'#fb923c':d>30?'#f59e0b':'#22c55e';return`<tr data-i="${i}"><td>${r.n}</td><td style="font-family:ui-monospace,monospace;font-size:11px;color:var(--c1)">${r.a}</td><td>${r.f}</td><td>${r.o}</td><td>${r.po}</td><td>${r.s.split('-').reverse().join('/')}</td><td class="r" style="color:${c}">${d}</td><td class="r">${brl(r.g)}</td><td><span class="pill" style="color:${c};border-color:${c}66">${r.m}</span></td></tr>`}).join('');
+}
+carregarDados();
+</script></body></html>
